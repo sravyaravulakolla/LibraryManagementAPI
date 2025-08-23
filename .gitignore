@@ -1,0 +1,13 @@
+﻿bin/
+obj/
+.vs/
+*.user
+*.suo
+*.log
+publish/
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+.idea/
+*.DotSettings.user
+node_modules/
