@@ -1,5 +1,6 @@
 
 using LibraryManagementAPI.Models;
+using LibraryManagementAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementAPI
@@ -20,6 +21,7 @@ namespace LibraryManagementAPI
             builder.Services.AddDbContext<LibMgmtDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LibMgmtCon")));
 
+            builder.Services.AddScoped<IBookService, BookService>();
 
             var app = builder.Build();
 

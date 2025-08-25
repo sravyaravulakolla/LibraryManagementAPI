@@ -17,5 +17,5 @@ public partial class Library
 
     public DateTime UpdatedDate { get; set; }
 
-    public virtual ICollection<Book> Books { get; set; } = new List<Book>();
+    public virtual ICollection<LibraryBook> LibraryBooks { get; set; } = new List<LibraryBook>();
 }

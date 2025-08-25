@@ -17,13 +17,11 @@ public partial class Book
 
     public int AvailableCopies { get; set; }
 
-    public int LibraryId { get; set; }
-
     public DateTime CreatedDate { get; set; }
 
     public DateTime UpdatedDate { get; set; }
 
     public virtual Category Category { get; set; } = null!;
 
-    public virtual Library Library { get; set; } = null!;
+    public virtual ICollection<LibraryBook> LibraryBooks { get; set; } = new List<LibraryBook>();
 }

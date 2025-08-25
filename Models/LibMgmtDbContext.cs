@@ -21,6 +21,8 @@ public partial class LibMgmtDbContext : DbContext
 
     public virtual DbSet<Library> Libraries { get; set; }
 
+    public virtual DbSet<LibraryBook> LibraryBooks { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=WIN11;Database=LibMgmtDb;Integrated Security=true;Trusted_Connection=True;TrustServerCertificate=True");
@@ -46,11 +48,6 @@ public partial class LibMgmtDbContext : DbContext
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Fk_Books_Categories");
-
-            entity.HasOne(d => d.Library).WithMany(p => p.Books)
-                .HasForeignKey(d => d.LibraryId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Books_Libraries");
         });
 
         modelBuilder.Entity<Category>(entity =>
@@ -72,6 +69,25 @@ public partial class LibMgmtDbContext : DbContext
             entity.Property(e => e.UpdatedDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<LibraryBook>(entity =>
+        {
+            entity.HasKey(e => e.LibraryBookId).HasName("PK__LibraryB__86922193BDEDE531");
+
+            entity.HasIndex(e => new { e.LibraryId, e.BookId }, "UQ_LibraryBooks").IsUnique();
+
+            entity.Property(e => e.AvailableCopies).HasDefaultValue(1);
+
+            entity.HasOne(d => d.Book).WithMany(p => p.LibraryBooks)
+                .HasForeignKey(d => d.BookId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LibraryBooks_Books");
+
+            entity.HasOne(d => d.Library).WithMany(p => p.LibraryBooks)
+                .HasForeignKey(d => d.LibraryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LibraryBooks_Libraries");
         });
 
         OnModelCreatingPartial(modelBuilder);
