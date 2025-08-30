@@ -62,7 +62,7 @@ namespace LibraryManagementAPI.Services
              })
              .FirstOrDefaultAsync();
         }
-        public async Task<Book> AddBookAsync(BookDTO bookDto)
+        public async Task<BookDTO> AddBookAsync(BookDTO bookDto)
         {
             var category = await _context.Categories
                 .FirstOrDefaultAsync(c => c.Name == bookDto.CategoryName);
@@ -102,10 +102,18 @@ namespace LibraryManagementAPI.Services
             }
 
             await _context.SaveChangesAsync();
-            return book; 
+            //return book; 
+            return new BookDTO
+            {
+                BookId = book.BookId,
+                Title = book.Title,
+                Author = book.Author,
+                CategoryName = category.Name,
+                Price = book.Price
+            };
         }
 
-        public async Task<Book> UpdateBookAsync(BookDTO bookDto)
+        public async Task<BookDTO> UpdateBookAsync(BookDTO bookDto)
         {
             var book = await _context.Books
                 .FirstOrDefaultAsync(b => b.BookId == bookDto.BookId);
@@ -154,7 +162,15 @@ namespace LibraryManagementAPI.Services
             }
 
             await _context.SaveChangesAsync();
-            return book;
+            //return book;
+            return new BookDTO
+            {
+                BookId = book.BookId,
+                Title = book.Title,
+                Author = book.Author,
+                CategoryName = category.Name,
+                Price = book.Price
+            };
         }
 
 
