@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementAPI.Models;
 
-public partial class LibMgmtDbContext : DbContext
+public partial class LibMgmtDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
 {
     public LibMgmtDbContext()
     {

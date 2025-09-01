@@ -9,7 +9,7 @@ namespace LibraryManagementAPI.Services
         Task<IEnumerable<BookDTO>> GetAllBooksAsync();
         Task<BookDTO?> GetBookByIdAsync(int bookId);
         Task<BookDTO> AddBookAsync(BookDTO book);
-        Task<BookDTO> UpdateBookAsync(BookDTO book);
+        Task<BookDTO> UpdateBookAsync(int id, BookDTO book);
         Task DeleteBookAsync(int bookId);
     }
 

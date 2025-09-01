@@ -113,13 +113,13 @@ namespace LibraryManagementAPI.Services
             };
         }
 
-        public async Task<BookDTO> UpdateBookAsync(BookDTO bookDto)
+        public async Task<BookDTO> UpdateBookAsync(int id, BookDTO bookDto)
         {
             var book = await _context.Books
-                .FirstOrDefaultAsync(b => b.BookId == bookDto.BookId);
+                .FirstOrDefaultAsync(b => b.BookId == id);
 
             if (book == null)
-                throw new Exception($"Book with Id {bookDto.BookId} not found.");
+                throw new Exception($"Book with Id {id} not found.");
 
             var category = await _context.Categories
                 .FirstOrDefaultAsync(c => c.Name == bookDto.CategoryName);

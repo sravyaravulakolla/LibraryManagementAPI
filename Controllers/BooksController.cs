@@ -1,10 +1,12 @@
 ﻿using LibraryManagementAPI.Models.DTOs;
 using LibraryManagementAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BooksController : ControllerBase
 {
     private readonly IBookService _bookService;
@@ -13,8 +15,8 @@ public class BooksController : ControllerBase
     {
         _bookService = bookService;
     }
-
     [HttpGet]
+    [Authorize(Roles = "Admin,Librarian,User")]
     public async Task<IActionResult> GetAllBooks()
     {
         var books = await _bookService.GetAllBooksAsync();
@@ -23,6 +25,7 @@ public class BooksController : ControllerBase
 
     // GET: api/books/{id}
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin,Librarian,User")]
     public async Task<IActionResult> GetBookById(int id)
     {
         var book = await _bookService.GetBookByIdAsync(id);
@@ -34,6 +37,7 @@ public class BooksController : ControllerBase
 
     // POST: api/books
     [HttpPost]
+    [Authorize(Roles = "Admin,Librarian")]
     public async Task<IActionResult> AddBook([FromBody] BookDTO bookDto)
     {
         if (!ModelState.IsValid)
@@ -45,14 +49,15 @@ public class BooksController : ControllerBase
 
     // PUT: api/books/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateBook([FromBody] BookDTO bookDto)
+    [Authorize(Roles = "Admin,Librarian")]
+    public async Task<IActionResult> UpdateBook(int id, [FromBody] BookDTO bookDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         try
         {
-            var updatedBook = await _bookService.UpdateBookAsync(bookDto);
+            var updatedBook = await _bookService.UpdateBookAsync(id, bookDto);
             return Ok(updatedBook);
         }
         catch (Exception ex)
@@ -62,6 +67,7 @@ public class BooksController : ControllerBase
     }
 
     // DELETE: api/books/{id}
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteBook(int id)
     {
