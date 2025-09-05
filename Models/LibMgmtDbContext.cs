@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementAPI.Models;
 
-public partial class LibMgmtDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
+public partial class LibMgmtDbContext: DbContext
 {
     public LibMgmtDbContext()
     {
@@ -31,6 +31,7 @@ public partial class LibMgmtDbContext : IdentityDbContext<ApplicationUser, Ident
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
         modelBuilder.Entity<Book>(entity =>
         {
             entity.HasKey(e => e.BookId).HasName("PK__Books__3DE0C207F912F932");

@@ -1,55 +1,51 @@
-﻿//using LibraryManagementAPI.Models;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.IdentityModel.Tokens;
-//using System.IdentityModel.Tokens.Jwt;
-//using System.Security.Claims;
-//using System.Text;
+﻿using LibraryManagementAPI.Models;
+using LibraryManagementAPI.Models.DTOs;
+using LibraryManagementAPI.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
-//namespace LibraryManagementAPI.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class AuthController : ControllerBase
-//    {
-//        private readonly IConfiguration _config;
+namespace LibraryManagementAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        private readonly IAuthService _authService;
 
-//        public AuthController(IConfiguration config)
-//        {
-//            _config = config;
-//        }
+        public AuthController(IAuthService authService)
+        {
+            _authService = authService;
+        }
 
-//        [HttpPost("login")]
-//        public IActionResult Login([FromBody] ApplicationUser model)
-//        {
-//            // Dummy authentication - replace with DB check
-//            if (model.Username == "admin" && model.Password == "password")
-//            {
-//                var token = GenerateJwtToken(model.Username);
-//                return Ok(new { token });
-//            }
-//            return Unauthorized("Invalid credentials");
-//        }
+        [HttpPost]
+        public async Task<IActionResult> Register([FromBody] Register model)
+        {
+            var result = await _authService.RegisterAsync(model);
+            if (result == null) return BadRequest("Registration failed");
+            return Ok(result);
+        }
 
-//        private string GenerateJwtToken(string username)
-//        {
-//            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-//            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        [HttpPost]
+        public async Task<IActionResult> Login([FromBody] Login model)
+        {
+            var (token, expiration) = await _authService.LoginAsync(model);
+            if (token == null) return Unauthorized("Invalid credentials");
 
-//            var claims = new[]
-//            {
-//            new Claim(ClaimTypes.Name, username),
-//            new Claim(ClaimTypes.Role, "Admin")
-//        };
+            return Ok(new { token, expiration });
+        }
 
-//            var token = new JwtSecurityToken(
-//                issuer: _config["Jwt:Issuer"],
-//                audience: _config["Jwt:Audience"],
-//                claims: claims,
-//                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_config["Jwt:ExpireMinutes"])),
-//                signingCredentials: credentials);
+        [HttpPost]
+        [Authorize(Roles = "LibraryManager")] // ✅ Only LibraryManager can assign roles
+        public async Task<IActionResult> AssignRole([FromBody] AssignRoleDto model)
+        {
+            // Get current logged-in user's role
+            var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-//            return new JwtSecurityTokenHandler().WriteToken(token);
-//        }
-//    }
-//}
+            var result = await _authService.AssignRoleAsync(model, currentUserRole);
+            if (result == null) return BadRequest("Failed to assign role.");
+
+            return Ok(result);
+        }
+    }
+}

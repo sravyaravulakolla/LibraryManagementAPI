@@ -8,8 +8,5 @@ namespace LibraryManagementAPI.Models
         public string FullName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Role-based separation (optional, since IdentityRole handles this too)
-        // But useful if you want to directly identify type
-        public string UserType { get; set; } = string.Empty;  // e.g., "LibraryManager", "Donor", "Customer"
-    }
+         }
 }
