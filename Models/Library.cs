@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LibraryManagementAPI.Models;
-
-public partial class Library
+namespace LibraryManagementAPI.Models
 {
-    public int LibraryId { get; set; }
+    public partial class Library
+    {
+        public int LibraryId { get; set; }
 
-    public string Name { get; set; } = null!;
+        public string Name { get; set; } = null!;
 
-    public string Address { get; set; } = null!;
+        public string Address { get; set; } = null!;
 
-    public int MaximumCapacity { get; set; }
+        public int MaximumCapacity { get; set; }
 
-    public DateTime CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; }
 
-    public DateTime UpdatedDate { get; set; }
+        public DateTime UpdatedDate { get; set; }
 
-    public virtual ICollection<LibraryBook> LibraryBooks { get; set; } = new List<LibraryBook>();
+        // Navigation property for categories in this library
+        public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+    }
 }

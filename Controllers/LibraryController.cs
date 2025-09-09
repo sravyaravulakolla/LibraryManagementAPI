@@ -4,12 +4,14 @@ using LibraryManagementAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 
 namespace LibraryManagementAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
+    [EnableCors]
     public class LibraryController : ControllerBase
     {
         private readonly ILibraryService _libraryService;
@@ -21,16 +23,17 @@ namespace LibraryManagementAPI.Controllers
 
         // GET: api/libraries
         [HttpGet]
-        [Authorize(Roles = "Admin,Librarian,User")]
-        public async Task<ActionResult<IEnumerable<Library>>> GetLibraries()
+        //[Authorize(Roles = "Admin,Librarian,User")]
+        public async Task<ActionResult<IEnumerable<LibraryDTO>>> GetLibraries()
         {
             var libraries = await _libraryService.GetAllLibrariesAsync();
             return Ok(libraries);
         }
 
+
         // GET: api/libraries/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,Librarian,User")]
+        //[Authorize(Roles = "Admin,Librarian,User")]
         public async Task<ActionResult<LibraryDTO>> GetLibrary(int id)
         {
             var library = await _libraryService.GetLibraryByIdAsync(id);
@@ -84,18 +87,18 @@ namespace LibraryManagementAPI.Controllers
             return NoContent();
         }
 
-        // GET: api/libraries/5/availability
-        [HttpGet("{id}/availability")]
+        // GET: api/libraries/5/books
+        [HttpGet("{id}/books")]
         [Authorize(Roles = "Admin,Librarian,User")]
-        public async Task<ActionResult<IEnumerable<LibraryAvailabilityDto>>> GetLibraryAvailability(int id)
+        public async Task<ActionResult<IEnumerable<BookDTO>>> GetLibraryBooks(int id)
         {
-            var availability = await _libraryService.GetBookAvailabilityAsync(id);
-            if (availability == null || !availability.Any())
-            {
+            var books = await _libraryService.GetBooksInLibraryAsync(id); // New method in service
+            if (books == null || !books.Any())
                 return NotFound();
-            }
-            return Ok(availability);
+
+            return Ok(books);
         }
+
     }
 }
 

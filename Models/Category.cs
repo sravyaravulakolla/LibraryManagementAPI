@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json;
 
-namespace LibraryManagementAPI.Models;
-
-public partial class Category
+namespace LibraryManagementAPI.Models
 {
-    public int CategoryId { get; set; }
-
-    public string Name { get; set; } = null!;
-
-    public virtual ICollection<Book> Books { get; set; } = new List<Book>();
+    public class Category
+    {
+        public int CategoryId { get; set; }
+        public string Name { get; set; } = null!;
+        public int LibraryId { get; set; }
+        [JsonIgnore]
+        public Library Library { get; set; } = null!; // Navigation property
+        public ICollection<Book> Books { get; set; } = new List<Book>();
+    }
 }

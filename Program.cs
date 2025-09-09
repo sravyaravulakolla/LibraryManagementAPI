@@ -90,6 +90,8 @@ namespace LibraryManagementAPI
             builder.Services.AddScoped<IBookService, BookService>();
             builder.Services.AddScoped<ILibraryService, LibraryService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 
 
             var app = builder.Build();
@@ -110,6 +112,10 @@ namespace LibraryManagementAPI
             }
 
             app.UseHttpsRedirection();
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            });
             app.UseAuthentication();
 
             app.UseAuthorization();

@@ -8,7 +8,7 @@ namespace LibraryManagementAPI.Services
         public static async Task SeedRolesAndAdminAsync(RoleManager<IdentityRole> roleManager,
             UserManager<ApplicationUser> userManager)
         {
-            string[] roleNames = { "LibraryManager", "Customer", "Supplier" };
+            string[] roleNames = { "Admin", "Librarian", "Samaritan", "Borrower" };
 
             foreach (var role in roleNames)
             {
@@ -17,6 +17,7 @@ namespace LibraryManagementAPI.Services
                     await roleManager.CreateAsync(new IdentityRole(role));
                 }
             }
+
             var adminEmail = "admin@library.com";
             var adminPassword = "Admin@123"; // strong password
 
@@ -27,7 +28,7 @@ namespace LibraryManagementAPI.Services
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
-                    FullName = "Default Library Manager",
+                    FullName = "Default Admin",
                     CreatedAt = DateTime.UtcNow,
                     EmailConfirmed = true
                 };
@@ -35,7 +36,8 @@ namespace LibraryManagementAPI.Services
                 var createAdmin = await userManager.CreateAsync(adminUser, adminPassword);
                 if (createAdmin.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "LibraryManager");
+                    // Add admin to the "Admin" role
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
             }
         }

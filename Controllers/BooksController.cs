@@ -1,12 +1,13 @@
 ﻿using LibraryManagementAPI.Models.DTOs;
-using LibraryManagementAPI.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+using System.Web.Http.ModelBinding;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[EnableCors]
+//[Authorize]
 public class BooksController : ControllerBase
 {
     private readonly IBookService _bookService;
@@ -15,17 +16,17 @@ public class BooksController : ControllerBase
     {
         _bookService = bookService;
     }
+
     [HttpGet]
-    [Authorize(Roles = "Admin,Librarian,User")]
+    //[Authorize(Roles = "Admin,Librarian,Samaritan,Borrower")]
     public async Task<IActionResult> GetAllBooks()
     {
         var books = await _bookService.GetAllBooksAsync();
         return Ok(books);
     }
 
-    // GET: api/books/{id}
     [HttpGet("{id}")]
-    [Authorize(Roles = "Admin,Librarian,User")]
+    [Authorize(Roles = "Admin,Librarian,Samaritan,Borrower")]
     public async Task<IActionResult> GetBookById(int id)
     {
         var book = await _bookService.GetBookByIdAsync(id);
@@ -35,9 +36,8 @@ public class BooksController : ControllerBase
         return Ok(book);
     }
 
-    // POST: api/books
     [HttpPost]
-    [Authorize(Roles = "Admin,Librarian")]
+    [Authorize(Roles = "Admin,Librarian,Samaritan")]
     public async Task<IActionResult> AddBook([FromBody] BookDTO bookDto)
     {
         if (!ModelState.IsValid)
@@ -47,7 +47,17 @@ public class BooksController : ControllerBase
         return CreatedAtAction(nameof(GetBookById), new { id = newBook.BookId }, newBook);
     }
 
-    // PUT: api/books/{id}
+    [HttpPost("bulk")]
+    [Authorize(Roles = "Admin,Librarian,Samaritan")]
+    public async Task<IActionResult> BulkAddBooks([FromBody] List<BookDTO> booksDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var addedBooks = await _bookService.AddBooksBulkAsync(booksDto);
+        return Ok(addedBooks);
+    }
+
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin,Librarian")]
     public async Task<IActionResult> UpdateBook(int id, [FromBody] BookDTO bookDto)
@@ -66,19 +76,32 @@ public class BooksController : ControllerBase
         }
     }
 
-    // DELETE: api/books/{id}
-    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteBook(int id)
     {
         try
         {
             await _bookService.DeleteBookAsync(id);
-            return NoContent(); 
+            return NoContent();
         }
         catch (Exception ex)
         {
             return NotFound(ex.Message);
         }
     }
+    //[HttpPost("{bookId}/rate")]
+    //public async Task<IActionResult> RateBook(int bookId, [FromBody] decimal newRating)
+    //{
+    //    var book = await _context.Books.FindAsync(bookId);
+    //    if (book == null) return NotFound();
+
+    //    // Simple average logic:
+    //    book.Rating = (book.Rating + newRating) / 2;
+    //    book.UpdatedDate = DateTime.UtcNow;
+    //    await _context.SaveChangesAsync();
+
+    //    return Ok(new { message = "Rating updated successfully", updatedRating = book.Rating });
+    //}
+
 }

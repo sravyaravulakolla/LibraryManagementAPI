@@ -44,7 +44,7 @@ namespace LibraryManagementAPI.Services
                 return string.Join(", ", result.Errors.Select(e => e.Description));
 
             // default to "Customer" if role not passed
-            var role = string.IsNullOrEmpty(model.Role) ? "Customer" : model.Role;
+            var role = string.IsNullOrEmpty(model.Role) ? "Borrower" : model.Role;
 
             if (!await _roleManager.RoleExistsAsync(role))
                 await _roleManager.CreateAsync(new IdentityRole(role));
@@ -95,8 +95,8 @@ namespace LibraryManagementAPI.Services
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
 
             return new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
+                issuer: _configuration["JWT:Issuer"],
+                audience: _configuration["JWT:Audience"],
                 expires: DateTime.UtcNow.AddHours(3),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
