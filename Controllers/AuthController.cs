@@ -53,7 +53,8 @@ namespace LibraryManagementAPI.Controllers
                 token,
                 expiration,
                 role,
-                userName = user.FullName
+                userName = user.FullName,
+                userEmail=user.Email
             });
         }
 

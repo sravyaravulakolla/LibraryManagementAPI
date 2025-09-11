@@ -44,8 +44,15 @@ namespace LibraryManagementAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var newCategory = await _categoryService.AddCategoryAsync(categoryDto);
-            return CreatedAtAction(nameof(GetCategoryById), new { id = newCategory.CategoryId }, newCategory);
+            try
+            {
+                var newCategory = await _categoryService.AddCategoryAsync(categoryDto);
+                return CreatedAtAction(nameof(GetCategoryById), new { id = newCategory.CategoryId }, newCategory);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
@@ -66,11 +73,20 @@ namespace LibraryManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var deleted = await _categoryService.DeleteCategoryAsync(id);
-            if (!deleted)
-                return NotFound($"Category with ID {id} not found.");
+            try
+            {
+                var deleted = await _categoryService.DeleteCategoryAsync(id);
 
-            return NoContent();
+                if (!deleted)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
     }
 }

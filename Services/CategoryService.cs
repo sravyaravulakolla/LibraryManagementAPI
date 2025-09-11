@@ -49,6 +49,15 @@ namespace LibraryManagementAPI.Services
 
         public async Task<Category> AddCategoryAsync(CategoryDto categoryDto)
         {
+            // Check if a category with the same name already exists in this library
+            bool exists = await _context.Categories
+                .AnyAsync(c => c.LibraryId == categoryDto.LibraryId && c.Name.ToLower() == categoryDto.Name.ToLower());
+
+            if (exists)
+            {
+                throw new InvalidOperationException("A category with this name already exists in the library.");
+            }
+
             var category = new Category
             {
                 Name = categoryDto.Name,
@@ -59,6 +68,7 @@ namespace LibraryManagementAPI.Services
             await _context.SaveChangesAsync();
             return category;
         }
+
 
         public async Task<Category?> UpdateCategoryAsync(int id, CategoryDto categoryDto)
         {
@@ -74,12 +84,22 @@ namespace LibraryManagementAPI.Services
 
         public async Task<bool> DeleteCategoryAsync(int id)
         {
-            var existing = await _context.Categories.FindAsync(id);
-            if (existing == null) return false;
+            var existing = await _context.Categories
+                .Include(c => c.Books)   // Load related books
+                .FirstOrDefaultAsync(c => c.CategoryId == id);
+
+            if (existing == null)
+                return false;
+
+            if (existing.Books.Any())
+            {
+                throw new InvalidOperationException("Cannot delete category because it has associated books.");
+            }
 
             _context.Categories.Remove(existing);
             await _context.SaveChangesAsync();
             return true;
         }
+
     }
 }

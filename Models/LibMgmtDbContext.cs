@@ -22,6 +22,8 @@ public partial class LibMgmtDbContext: DbContext
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Library> Libraries { get; set; }
+    public DbSet<BorrowingRecord> BorrowingRecords { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -72,7 +74,32 @@ public partial class LibMgmtDbContext: DbContext
                 .HasColumnType("datetime");
         });
 
-        
+        modelBuilder.Entity<BorrowingRecord>(entity =>
+        {
+            entity.HasKey(e => e.BorrowingRecordId);
+
+            entity.Property(e => e.BorrowedDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.Property(e => e.ReturnedDate)
+                .HasColumnType("datetime");
+
+            // Foreign key to ApplicationUser
+            entity.HasOne(br => br.User)
+                .WithMany() // if you want a collection in ApplicationUser, you can add `public ICollection<BorrowingRecord> BorrowingRecords { get; set; }`
+                .HasForeignKey(br => br.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Foreign key to Book
+            entity.HasOne(br => br.Book)
+                .WithMany() // same here, you can add `public ICollection<BorrowingRecord> BorrowingRecords { get; set; }` in Book
+                .HasForeignKey(br => br.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+
+
 
         OnModelCreatingPartial(modelBuilder);
     }

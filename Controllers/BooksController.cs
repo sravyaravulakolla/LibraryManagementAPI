@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Web.Http.ModelBinding;
 
 [ApiController]
@@ -82,12 +84,19 @@ public class BooksController : ControllerBase
     {
         try
         {
-            await _bookService.DeleteBookAsync(id);
-            return NoContent();
+            var result = await _bookService.DeleteBookAsync(id);
+            if (result)
+                return Ok(new { message = "Book deleted successfully." });
+
+            return NotFound(new { message = "Book not found." });
+        }
+        catch (DbUpdateException ex) // For foreign key violation
+        {
+            return BadRequest(new { message = "Cannot delete book: it is currently borrowed by a user." });
         }
         catch (Exception ex)
         {
-            return NotFound(ex.Message);
+            return StatusCode(500, new { message = ex.Message });
         }
     }
     //[HttpPost("{bookId}/rate")]
@@ -103,5 +112,34 @@ public class BooksController : ControllerBase
 
     //    return Ok(new { message = "Rating updated successfully", updatedRating = book.Rating });
     //}
+    [HttpPost("{bookId}")]
+    [Authorize(Roles = "Borrower")]
+    public async Task<IActionResult> BorrowBook(int bookId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await _bookService.BorrowBookAsync(userId, bookId);
+
+        if (result == "Book borrowed successfully.")
+            return Ok(new { message = result });
+
+        return BadRequest(new { message = result });
+    }
+    [HttpPost("return")]
+    //[Authorize(Roles = "Admin,Librarian,Samaritan,Borrower")]
+    public async Task<IActionResult> ReturnBook(int bookId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("User ID not found in token.");
+
+        var resultMessage = await _bookService.ReturnBookAsync(userId, bookId);
+
+        if (resultMessage == "No active borrowing record found.")
+            return NotFound(resultMessage);
+
+        return Ok(new { message = resultMessage });
+    }
+
+
 
 }
